@@ -1,4 +1,4 @@
-name: build
+name: build-postee
 on:
   workflow_dispatch:
 env:
@@ -20,7 +20,7 @@ jobs:
         id: trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
+          image-ref: 'docker.io/${{ env.ORGANIZATION }}/${{ env.APP }}:${{ github.sha }}'
           format: 'json'
           exit-code: '1'
           ignore-unfixed: true
