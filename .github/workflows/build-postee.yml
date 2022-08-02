@@ -1,0 +1,33 @@
+name: build
+on:
+  workflow_dispatch:
+env:
+  ORGANIZATION: krol
+  APP: helloworld
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build an image from Dockerfile
+        run: |
+          docker build -t docker.io/${{ env.ORGANIZATION }}/${{ env.APP }}:${{ github.sha }} .
+
+      - name: Run Trivy vulnerability scanner
+        id: trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
+          format: 'json'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          output: 'trivy-results.json'
+
+      - name: Slack Notification
+        run: |
+          cat trivy-results.json
