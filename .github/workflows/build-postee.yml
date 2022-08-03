@@ -22,12 +22,16 @@ jobs:
         with:
           image-ref: 'docker.io/${{ env.ORGANIZATION }}/${{ env.APP }}:${{ github.sha }}'
           format: 'json'
-          exit-code: '1'
-          ignore-unfixed: true
+          exit-code: '0'
+          ignore-unfixed: false
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           output: 'trivy-results.json'
 
       - name: Slack Notification
+        env:
+          POSTEE: '{{ secrets.POSTEE_SERVER }}'
         run: |
-          cat trivy-results.json
+          RESULTS="$(cat trivy-results.json)"
+          /usr/bin/curl -s -H 'Content-Type: application/json' -d "$RESULTS" "$POSTEE"
+        # localhost:8082
